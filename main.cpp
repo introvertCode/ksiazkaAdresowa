@@ -5,14 +5,176 @@
 #include <cstdlib>
 #include <sstream>
 #include <vector>
-
+#include <stdio.h>
+#include <cstdio>
 
 using namespace std;
 
 struct znajomy {
     int id = 0;
+    int idUzytkownika;
     string imie, nazwisko, telefon, email, adres;
 };
+
+struct uzytkownik {
+    string login;
+    string haslo;
+    int id;
+};
+
+void zapisUseraDoPliku(int iloscUzytkownikow, vector<uzytkownik>& uzytkownicy) {
+    fstream plik;
+    plik.open("Users.txt",ios::out);
+    for(int i = 0; i <= iloscUzytkownikow; i++) {
+        plik << uzytkownicy[i].id << "|";
+        plik << uzytkownicy[i].login <<  "|";
+        plik << uzytkownicy[i].haslo <<  "|" << endl;
+    }
+    plik.close();
+}
+
+bool sprawdzCzyWolnyLogin(vector<uzytkownik>& uzytkownicy, string login, int iloscUzytkownikow) {
+    bool czyWolnyLogin = true;
+    for (int i = 0; i < iloscUzytkownikow; i++) {
+        if (uzytkownicy[i].login == login)
+            czyWolnyLogin = false;
+    }
+    return czyWolnyLogin;
+}
+
+void nowyUzytownik(vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
+    string login, haslo;
+    int id = iloscUzytkownikow;
+    char decyzja;
+
+    while(true) {
+        cout << "wpisz nazwe uzytkownika: ";
+        cin >> login;
+        if (sprawdzCzyWolnyLogin(uzytkownicy, login, iloscUzytkownikow)==true) {
+            cout << "wpisz haslo: ";
+            cin >> haslo;
+            uzytkownicy.push_back(uzytkownik());
+            uzytkownicy[id].login = login;
+            uzytkownicy[id].haslo = haslo;
+            uzytkownicy[id].id = id;
+            zapisUseraDoPliku(iloscUzytkownikow, uzytkownicy);
+            cout << "utworzono pomyslnie" << endl << endl;
+            return;
+        } else
+            cout << "Uzytkownik o takiej nazwie juz istnieje, wrocic do menu? (t/n)" << endl;
+        decyzja = getch();
+        decyzja = tolower(decyzja);
+        if (decyzja == 't') return;
+        else continue;
+    }
+}
+
+int logowanie(vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
+
+    string login, haslo;
+    int idZalogowanegoUzytkownika;
+    char czyWyjsc;
+    while(true) {
+        cout << "wpisz login: ";
+        cin >> login;
+
+        for (int i = 0; i <= iloscUzytkownikow; i++) {
+            if (uzytkownicy[i].login == login) {
+                for (int iloscProb = 2; iloscProb >= 0; iloscProb--) {
+                    cout << "wpisz haslo: ";
+                    cin >> haslo;
+
+                    if (uzytkownicy[i].haslo == haslo) {
+                        idZalogowanegoUzytkownika = uzytkownicy[i].id;
+                        cout << "zalogowano pomyslnie" << endl;
+                        return idZalogowanegoUzytkownika;
+                    } else {
+                        if (iloscProb > 0) {
+                            cout << "Nieprawidlowe haslo, pozostalo " << iloscProb << " prob" << endl;
+                            continue;
+                        } else {
+                            cout << "3 razy wpisano bledne haslo, poczekaj, nastapi powrot do menu" << endl;
+                            Sleep(5000);
+                            return -1;
+                        }
+                    }
+                }
+            }
+        }
+        cout << "nie ma takiego uzytkownika" << endl;
+        cout << "wyjsc do menu? (t/n): ";
+        czyWyjsc = getch();
+        cout << endl << endl;
+        if (czyWyjsc == 't') {
+            return -1;
+        }
+        //else continue;
+    }
+    return false;
+}
+
+int odczytajPlik(vector<uzytkownik>& uzytkownicy) {
+    ifstream plik;
+    string linia;
+    string atrybut;
+    int iloscUzytkownikow = 0;
+    int pozycja = 0;
+
+    plik.open("Users.txt", ios::in);
+    if (plik.good() == false) {
+        plik.open("Users.txt", ios::out);
+    }
+    while (getline(plik,linia)) {
+        if (linia == "")
+            continue;
+        stringstream liniaSS (linia);
+
+        uzytkownicy.push_back(uzytkownik());
+        while(getline(liniaSS, atrybut, '|' )) {
+            switch (pozycja) {
+            case 0:
+                uzytkownicy[iloscUzytkownikow].id = stoi(atrybut);
+                break;
+            case 1:
+                uzytkownicy[iloscUzytkownikow].login = atrybut;
+                break;
+            case 2:
+                uzytkownicy[iloscUzytkownikow].haslo = atrybut;
+                break;
+            }
+            pozycja++;
+        }
+        iloscUzytkownikow++;
+        pozycja = 0;
+    }
+    plik.close();
+    return iloscUzytkownikow;
+}
+
+void zmienHaslo(int idZalogowanegoUzytkownika, vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow){
+string noweHaslo;
+cout << "wpisz nowe haslo, (jesli chcesz wrocic do menu wcisnij 'n' i enter): ";
+cin >> noweHaslo;
+if (noweHaslo == "n"){
+    cout << "powrot do menu, zmiana nie powiodla sie" << endl;
+    return;
+} else {
+for (int i = 0; i < iloscUzytkownikow; i++){
+    if (uzytkownicy[i].id == idZalogowanegoUzytkownika){
+        uzytkownicy[i].haslo = noweHaslo;
+        zapisUseraDoPliku(iloscUzytkownikow, uzytkownicy);
+        cout << "Haslo zmieniono pomyslnie!" << endl;
+        Sleep(1000);
+        return;
+    }
+}
+return;
+}
+
+
+return;
+
+}
 
 bool sprawdzCzyIstniejeZnajomy(string imie, string nazwisko, int iloscZnajomych, vector<znajomy>& znajomi) {
     bool czyZnajomyIstnieje = false;
@@ -64,22 +226,93 @@ bool sprawdzCzyIstniejeID(vector<znajomy>& znajomi, int iloscZnajomych, int id, 
     return czyIstnieje;
 }
 
-void zapisKontaktuDoPliku(int iloscZnajomych, vector<znajomy>& znajomi) {
-    fstream plik;
-    plik.open("kontakty.txt",ios::out);
-    for(int i = 0; i < iloscZnajomych; i++) {
+void zapisKontaktuDoPlikuPoEdycji(int iloscZnajomych, vector<znajomy>& znajomi, int idZalogowanegoUzytkownika) {
+    fstream plik, kopiaPlik;
+    plik.open("kontakty.txt",ios::in);
+    kopiaPlik.open("kopiaKontakty.txt",ios::out);
+    string linia;
+    string atrybut;
+    int pozycja = 0;
+    int id, idUzytkownika;
+    string imie, nazwisko, telefon, email, adres;
 
-        plik << znajomi[i].id << "|";
-        plik << znajomi[i].imie <<  "|";
-        plik << znajomi[i].nazwisko <<  "|";
-        plik << znajomi[i].telefon <<  "|";
-        plik << znajomi[i].email <<  "|";
-        plik << znajomi[i].adres <<  "|" << endl;
+    while (getline(plik,linia)) {
+        if (linia == "")
+            continue;
+        stringstream liniaSS (linia);
+
+        while(getline(liniaSS, atrybut, '|' )) {
+            switch (pozycja) {
+            case 0:
+                id = stoi(atrybut);
+                break;
+            case 1:
+                idUzytkownika = stoi(atrybut);
+                break;
+            case 2:
+                imie = atrybut;
+                break;
+            case 3:
+                nazwisko = atrybut;
+                break;
+            case 4:
+                telefon = atrybut;
+                break;
+            case 5:
+                email = atrybut;
+                break;
+            case 6:
+                adres = atrybut;
+                break;
+            }
+            pozycja++;
+        }
+        if(idUzytkownika != idZalogowanegoUzytkownika) {
+            kopiaPlik << id << "|";
+            kopiaPlik << idUzytkownika << "|";
+            kopiaPlik << imie <<  "|";
+            kopiaPlik << nazwisko <<  "|";
+            kopiaPlik << telefon <<  "|";
+            kopiaPlik << email <<  "|";
+            kopiaPlik << adres <<  "|" << endl;
+        }
+
+        else {
+            for(int i = 0; i < iloscZnajomych; i++) {
+                if(znajomi[i].id == id) {
+                    kopiaPlik << znajomi[i].id << "|";
+                    kopiaPlik << znajomi[i].idUzytkownika << "|";
+                    kopiaPlik << znajomi[i].imie <<  "|";
+                    kopiaPlik << znajomi[i].nazwisko <<  "|";
+                    kopiaPlik << znajomi[i].telefon <<  "|";
+                    kopiaPlik << znajomi[i].email <<  "|";
+                    kopiaPlik << znajomi[i].adres <<  "|" << endl;
+                }
+            }
+        }
+        pozycja = 0;
     }
+    plik.close();
+    kopiaPlik.close();
+    remove("kontakty.txt");
+    rename("kopiaKontakty.txt", "kontakty.txt");
+}
+
+void zapisKontaktuDoPliku(int iloscZnajomych, vector<znajomy>& znajomi, int idZalogowanegoUzytkownika) {
+    fstream plik;
+    plik.open("kontakty.txt",ios::out | ios::app);
+
+        plik << znajomi[iloscZnajomych].id << "|";
+        plik << znajomi[iloscZnajomych].idUzytkownika << "|";
+        plik << znajomi[iloscZnajomych].imie <<  "|";
+        plik << znajomi[iloscZnajomych].nazwisko <<  "|";
+        plik << znajomi[iloscZnajomych].telefon <<  "|";
+        plik << znajomi[iloscZnajomych].email <<  "|";
+        plik << znajomi[iloscZnajomych].adres <<  "|" << endl;
     plik.close();
 }
 
-int dodajKontakt (int iloscZnajomych, vector<znajomy>& znajomi) {
+int dodajKontakt (int iloscZnajomych, vector<znajomy>& znajomi, int idOstatniegoZnajomego, int idZalogowanegoUzytkownika) {
     string imie, nazwisko, email, adres, telefon;
     cout << "podaj imie i nazwisko: ";
     cin >> imie >> nazwisko;
@@ -87,11 +320,13 @@ int dodajKontakt (int iloscZnajomych, vector<znajomy>& znajomi) {
 
     if (sprawdzCzyIstniejeZnajomy(imie, nazwisko, iloscZnajomych, znajomi) == false ) {
         znajomi.push_back(znajomy());
-        if (iloscZnajomych == 0) {
+        if (idOstatniegoZnajomego == 0) {
             znajomi[iloscZnajomych].id = 1;
         } else {
-            znajomi[iloscZnajomych].id = znajomi[iloscZnajomych-1].id + 1;
+            znajomi[iloscZnajomych].id = idOstatniegoZnajomego + 1;
         }
+
+        znajomi[iloscZnajomych].idUzytkownika = idZalogowanegoUzytkownika;
         znajomi[iloscZnajomych].imie = imie;
         znajomi[iloscZnajomych].nazwisko = nazwisko;
 
@@ -109,6 +344,8 @@ int dodajKontakt (int iloscZnajomych, vector<znajomy>& znajomi) {
         cout << "podaj adres e-mail: ";
         cin >> email;
         znajomi[iloscZnajomych].email = email;
+
+        zapisKontaktuDoPliku(iloscZnajomych, znajomi, idZalogowanegoUzytkownika);
 
         cout << "zapisano kontakt" << endl;
     } else {
@@ -169,12 +406,15 @@ void wyszukajZnajomego(vector<znajomy>& znajomi, int iloscZnajomych, char wybor)
         cout << "Nie ma takiego znajomego." << endl << endl;
 }
 
-int OdczytajPlik(vector<znajomy>& znajomi) {
+
+int OdczytajPlik(vector<znajomy>& znajomi, int idZalogowanegoUzytkownika, int& idOstatniegoZnajomego) {
     ifstream plik;
     string linia;
     string atrybut;
     int iloscZnajomych = 0;
     int pozycja = 0;
+    int id, idUzytkownika;
+    string imie, nazwisko, telefon, email, adres;
 
 
     plik.open("kontakty.txt", ios::in);
@@ -186,36 +426,50 @@ int OdczytajPlik(vector<znajomy>& znajomi) {
             continue;
         stringstream liniaSS (linia);
 
-        znajomi.push_back(znajomy());
         while(getline(liniaSS, atrybut, '|' )) {
             switch (pozycja) {
             case 0:
-                znajomi[iloscZnajomych].id = stoi(atrybut);
+                id = stoi(atrybut);
                 break;
             case 1:
-                znajomi[iloscZnajomych].imie = atrybut;
+                idUzytkownika = stoi(atrybut);
                 break;
             case 2:
-                znajomi[iloscZnajomych].nazwisko = atrybut;
+                imie = atrybut;
                 break;
             case 3:
-                znajomi[iloscZnajomych].telefon = atrybut;
+                nazwisko = atrybut;
                 break;
             case 4:
-                znajomi[iloscZnajomych].email = atrybut;
+                telefon = atrybut;
                 break;
             case 5:
-                znajomi[iloscZnajomych].adres = atrybut;
+                email = atrybut;
+                break;
+            case 6:
+                adres = atrybut;
                 break;
             }
             pozycja++;
         }
-        iloscZnajomych++;
+        if (idUzytkownika == idZalogowanegoUzytkownika ) {
+            znajomi.push_back(znajomy());
+            znajomi[iloscZnajomych].id = id;
+            znajomi[iloscZnajomych].idUzytkownika = idZalogowanegoUzytkownika;
+            znajomi[iloscZnajomych].imie = imie;
+            znajomi[iloscZnajomych].nazwisko = nazwisko;
+            znajomi[iloscZnajomych].telefon = telefon;
+            znajomi[iloscZnajomych].email = email;
+            znajomi[iloscZnajomych].adres = adres;
+            iloscZnajomych++;
+        }
+        idOstatniegoZnajomego = id;
         pozycja = 0;
     }
     plik.close();
     return iloscZnajomych;
 }
+
 
 void edytujDaneZnajomego(vector<znajomy>& znajomi, int iloscZnajomych) {
     int id;
@@ -311,15 +565,62 @@ int usunZnajomego(vector<znajomy>& znajomi, int iloscZnajomych) {
 
 
 int main() {
+
+    vector<uzytkownik> uzytkownicy;
+    int idZalogowanegoUzytkownika = -1;
+    int iloscUzytkownikow = odczytajPlik(uzytkownicy);
+    bool PokazMenuLogowania = true;
+
     vector<znajomy> znajomi;
     int nowyZnajomy = 0;
     char wybor;
     char wyszukajPoImieniu = '1';
     char wyszukajPoNazwisku = '2';
-
-    int iloscZnajomych = OdczytajPlik(znajomi);
+    int idOstatniegoZnajomego = 0;
 
     while(1) {
+        if(PokazMenuLogowania) {
+            system("cls");
+            cout << "   --MENU--   " << endl;
+            cout << "1. zaloguj sie" << endl;
+            cout << "2. utworz konto" << endl;
+            cout << "3. wyjdz" << endl << endl;
+
+            // cout << "ilosc uzytkownikow: " << iloscUzytkownikow <<endl;
+            char wybor;
+
+            cin >> wybor;
+
+            switch (wybor) {
+            case '1':
+                if (iloscUzytkownikow == 0) {
+                    cout << "brak uzytkownikow" << endl;
+                    Sleep(1000);
+                    continue;
+                } else {
+                    idZalogowanegoUzytkownika = logowanie(uzytkownicy, iloscUzytkownikow);
+                    Sleep(1000);
+                    if (idZalogowanegoUzytkownika >= 0) {
+                        PokazMenuLogowania = false;
+                    }
+                    continue;
+                }
+                break;
+            case '2':
+                nowyUzytownik(uzytkownicy, iloscUzytkownikow);
+                iloscUzytkownikow += 1;
+                system("pause");
+                continue;
+                break;
+            case '3':
+                return 0;
+                break;
+            }
+        }
+
+        int iloscZnajomych = OdczytajPlik(znajomi, idZalogowanegoUzytkownika, idOstatniegoZnajomego);
+
+
         system("cls");
 
         cout << "Program ksiazka adresowa" << endl << endl;
@@ -330,18 +631,22 @@ int main() {
         cout << "4. Wyszukaj po nazwisku" << endl;
         cout << "5. Usun znajomego" << endl;
         cout << "6. Edytuj dane znajomego" << endl;
+        cout << "7. Wyloguj sie" << endl;
+        cout << "8. Zmiana hasla" << endl;
         cout << "9. Wyjscie" << endl;
         cout << "<====================================>" << endl;
 
+       // cout <<"id Ostatniego: " << idOstatniegoZnajomego<<endl;
+
         cin >> wybor;
-        //cout<< iloscZnajomych<<endl;
+
         cout << endl;
 
         switch (wybor) {
         case '1':
-            nowyZnajomy = dodajKontakt(iloscZnajomych, znajomi);
+            nowyZnajomy = dodajKontakt(iloscZnajomych, znajomi, idOstatniegoZnajomego, idZalogowanegoUzytkownika);
             iloscZnajomych += nowyZnajomy;
-            zapisKontaktuDoPliku(iloscZnajomych, znajomi);
+            idOstatniegoZnajomego += nowyZnajomy;
             system("pause");
             break;
         case '2':
@@ -358,12 +663,22 @@ int main() {
             break;
         case '5':
             iloscZnajomych -= usunZnajomego(znajomi, iloscZnajomych);
-            zapisKontaktuDoPliku(iloscZnajomych, znajomi);
+            zapisKontaktuDoPlikuPoEdycji(iloscZnajomych, znajomi, idZalogowanegoUzytkownika);
             system("pause");
             break;
         case '6':
             edytujDaneZnajomego(znajomi, iloscZnajomych);
-            zapisKontaktuDoPliku(iloscZnajomych, znajomi);
+            zapisKontaktuDoPlikuPoEdycji(iloscZnajomych, znajomi, idZalogowanegoUzytkownika);
+            system("pause");
+            break;
+        case '7':
+            PokazMenuLogowania = true;
+            znajomi.clear();
+            Sleep(1000);
+            continue;
+            break;
+        case '8':
+            zmienHaslo(idZalogowanegoUzytkownika, uzytkownicy, iloscUzytkownikow);
             system("pause");
             break;
         case '9':
