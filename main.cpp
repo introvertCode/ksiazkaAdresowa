@@ -10,22 +10,22 @@
 
 using namespace std;
 
-struct znajomy {
+struct Znajomy {
     int id = 0;
     int idUzytkownika;
     string imie, nazwisko, telefon, email, adres;
 };
 
-struct uzytkownik {
+struct Uzytkownik {
     string login;
     string haslo;
     int id;
 };
 
-void zapisUseraDoPliku(int iloscUzytkownikow, vector<uzytkownik>& uzytkownicy) {
+void zapisUseraDoPliku(int iloscUzytkownikow, vector<Uzytkownik>& uzytkownicy) {
     fstream plik;
     plik.open("Users.txt",ios::out);
-    for(int i = 0; i <= iloscUzytkownikow; i++) {
+    for(int i = 0; i < iloscUzytkownikow; i++) {
         plik << uzytkownicy[i].id << "|";
         plik << uzytkownicy[i].login <<  "|";
         plik << uzytkownicy[i].haslo <<  "|" << endl;
@@ -33,7 +33,7 @@ void zapisUseraDoPliku(int iloscUzytkownikow, vector<uzytkownik>& uzytkownicy) {
     plik.close();
 }
 
-bool sprawdzCzyWolnyLogin(vector<uzytkownik>& uzytkownicy, string login, int iloscUzytkownikow) {
+bool sprawdzCzyWolnyLogin(vector<Uzytkownik>& uzytkownicy, string login, int iloscUzytkownikow) {
     bool czyWolnyLogin = true;
     for (int i = 0; i < iloscUzytkownikow; i++) {
         if (uzytkownicy[i].login == login)
@@ -42,7 +42,7 @@ bool sprawdzCzyWolnyLogin(vector<uzytkownik>& uzytkownicy, string login, int ilo
     return czyWolnyLogin;
 }
 
-void nowyUzytownik(vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
+void nowyUzytownik(vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
     string login, haslo;
     int id = iloscUzytkownikow;
     char decyzja;
@@ -64,12 +64,14 @@ void nowyUzytownik(vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
             cout << "Uzytkownik o takiej nazwie juz istnieje, wrocic do menu? (t/n)" << endl;
         decyzja = getch();
         decyzja = tolower(decyzja);
-        if (decyzja == 't') return;
-        else continue;
+        if (decyzja == 't')
+            return;
+        else
+            continue;
     }
 }
 
-int logowanie(vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
+int logowanie(vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
 
     string login, haslo;
     int idZalogowanegoUzytkownika;
@@ -113,7 +115,7 @@ int logowanie(vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
     return false;
 }
 
-int odczytajPlik(vector<uzytkownik>& uzytkownicy) {
+int odczytajPlikUzytkownicy(vector<Uzytkownik>& uzytkownicy) {
     ifstream plik;
     string linia;
     string atrybut;
@@ -151,32 +153,30 @@ int odczytajPlik(vector<uzytkownik>& uzytkownicy) {
     return iloscUzytkownikow;
 }
 
-void zmienHaslo(int idZalogowanegoUzytkownika, vector<uzytkownik>& uzytkownicy, int iloscUzytkownikow){
-string noweHaslo;
-cout << "wpisz nowe haslo, (jesli chcesz wrocic do menu wcisnij 'n' i enter): ";
-cin >> noweHaslo;
-if (noweHaslo == "n"){
-    cout << "powrot do menu, zmiana nie powiodla sie" << endl;
-    return;
-} else {
-for (int i = 0; i < iloscUzytkownikow; i++){
-    if (uzytkownicy[i].id == idZalogowanegoUzytkownika){
-        uzytkownicy[i].haslo = noweHaslo;
-        zapisUseraDoPliku(iloscUzytkownikow, uzytkownicy);
-        cout << "Haslo zmieniono pomyslnie!" << endl;
-        Sleep(1000);
+void zmienHaslo(int idZalogowanegoUzytkownika, vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
+    string noweHaslo;
+    cout << "wpisz nowe haslo, (jesli chcesz wrocic do menu wcisnij 'n' i enter): ";
+    cin >> noweHaslo;
+
+    if (noweHaslo == "n") {
+        cout << "powrot do menu, zmiana nie powiodla sie" << endl;
+        return;
+    } else {
+        for (int i = 0; i < iloscUzytkownikow; i++) {
+            if (uzytkownicy[i].id == idZalogowanegoUzytkownika) {
+                uzytkownicy[i].haslo = noweHaslo;
+                zapisUseraDoPliku(iloscUzytkownikow, uzytkownicy);
+                cout << "Haslo zmieniono pomyslnie!" << endl;
+                Sleep(1000);
+                return;
+            }
+        }
         return;
     }
-}
-return;
-}
-
-
-return;
-
+    return;
 }
 
-bool sprawdzCzyIstniejeZnajomy(string imie, string nazwisko, int iloscZnajomych, vector<znajomy>& znajomi) {
+bool sprawdzCzyIstniejeZnajomy(string imie, string nazwisko, int iloscZnajomych, vector<Znajomy>& znajomi) {
     bool czyZnajomyIstnieje = false;
     for (int i = 0; i < iloscZnajomych; i++) {
         if( znajomi[i].imie == imie && znajomi[i].nazwisko == nazwisko ) {
@@ -193,7 +193,7 @@ bool sprawdzCzyIstniejeZnajomy(string imie, string nazwisko, int iloscZnajomych,
     return czyZnajomyIstnieje;
 }
 
-bool sprawdzCzyIstniejeID(vector<znajomy>& znajomi, int iloscZnajomych, int id, int& pozycjaZnajomegoWWektorze) {
+bool sprawdzCzyIstniejeID(vector<Znajomy>& znajomi, int iloscZnajomych, int id, int& pozycjaZnajomegoWWektorze) {
 
     bool czyIstnieje = false;
     char czyWyjsc;
@@ -226,7 +226,7 @@ bool sprawdzCzyIstniejeID(vector<znajomy>& znajomi, int iloscZnajomych, int id, 
     return czyIstnieje;
 }
 
-void zapisKontaktuDoPlikuPoEdycji(int iloscZnajomych, vector<znajomy>& znajomi, int idZalogowanegoUzytkownika) {
+void zapisKontaktuDoPlikuPoEdycji(int iloscZnajomych, vector<Znajomy>& znajomi, int idZalogowanegoUzytkownika) {
     fstream plik, kopiaPlik;
     plik.open("kontakty.txt",ios::in);
     kopiaPlik.open("kopiaKontakty.txt",ios::out);
@@ -298,21 +298,21 @@ void zapisKontaktuDoPlikuPoEdycji(int iloscZnajomych, vector<znajomy>& znajomi, 
     rename("kopiaKontakty.txt", "kontakty.txt");
 }
 
-void zapisKontaktuDoPliku(int iloscZnajomych, vector<znajomy>& znajomi, int idZalogowanegoUzytkownika) {
+void zapisKontaktuDoPliku(int iloscZnajomych, vector<Znajomy>& znajomi, int idZalogowanegoUzytkownika) {
     fstream plik;
     plik.open("kontakty.txt",ios::out | ios::app);
 
-        plik << znajomi[iloscZnajomych].id << "|";
-        plik << znajomi[iloscZnajomych].idUzytkownika << "|";
-        plik << znajomi[iloscZnajomych].imie <<  "|";
-        plik << znajomi[iloscZnajomych].nazwisko <<  "|";
-        plik << znajomi[iloscZnajomych].telefon <<  "|";
-        plik << znajomi[iloscZnajomych].email <<  "|";
-        plik << znajomi[iloscZnajomych].adres <<  "|" << endl;
+    plik << znajomi[iloscZnajomych].id << "|";
+    plik << znajomi[iloscZnajomych].idUzytkownika << "|";
+    plik << znajomi[iloscZnajomych].imie <<  "|";
+    plik << znajomi[iloscZnajomych].nazwisko <<  "|";
+    plik << znajomi[iloscZnajomych].telefon <<  "|";
+    plik << znajomi[iloscZnajomych].email <<  "|";
+    plik << znajomi[iloscZnajomych].adres <<  "|" << endl;
     plik.close();
 }
 
-int dodajKontakt (int iloscZnajomych, vector<znajomy>& znajomi, int idOstatniegoZnajomego, int idZalogowanegoUzytkownika) {
+int dodajKontakt (int iloscZnajomych, vector<Znajomy>& znajomi, int idOstatniegoZnajomego, int idZalogowanegoUzytkownika) {
     string imie, nazwisko, email, adres, telefon;
     cout << "podaj imie i nazwisko: ";
     cin >> imie >> nazwisko;
@@ -355,7 +355,7 @@ int dodajKontakt (int iloscZnajomych, vector<znajomy>& znajomi, int idOstatniego
     return 1;
 }
 
-void wyswietlKontakty(vector<znajomy>& znajomi, int iloscZnajomych) {
+void wyswietlKontakty(vector<Znajomy>& znajomi, int iloscZnajomych) {
     if (iloscZnajomych == 0)
         cout << "Nie masz zapisanych kontaktow" << endl;
     else {
@@ -367,7 +367,7 @@ void wyswietlKontakty(vector<znajomy>& znajomi, int iloscZnajomych) {
     }
 }
 
-bool wyswietlDaneZnajomego(vector<znajomy>& znajomi, int iloscZnajomych, string imie, string nazwisko) {
+bool wyswietlDaneZnajomego(vector<Znajomy>& znajomi, int iloscZnajomych, string imie, string nazwisko) {
     bool czyZnajomyIstnieje = false;
     for (int i = 0; i < iloscZnajomych; i++) {
         if (znajomi[i].imie == imie || znajomi[i].nazwisko == nazwisko) {
@@ -378,7 +378,7 @@ bool wyswietlDaneZnajomego(vector<znajomy>& znajomi, int iloscZnajomych, string 
     return czyZnajomyIstnieje;
 }
 
-void wyszukajZnajomego(vector<znajomy>& znajomi, int iloscZnajomych, char wybor) {
+void wyszukajZnajomego(vector<Znajomy>& znajomi, int iloscZnajomych, char wybor) {
 
     string imie = "";
     string nazwisko = "";
@@ -407,7 +407,7 @@ void wyszukajZnajomego(vector<znajomy>& znajomi, int iloscZnajomych, char wybor)
 }
 
 
-int OdczytajPlik(vector<znajomy>& znajomi, int idZalogowanegoUzytkownika, int& idOstatniegoZnajomego) {
+int odczytajPlikKontakty(vector<Znajomy>& znajomi, int idZalogowanegoUzytkownika, int& idOstatniegoZnajomego) {
     ifstream plik;
     string linia;
     string atrybut;
@@ -471,7 +471,7 @@ int OdczytajPlik(vector<znajomy>& znajomi, int idZalogowanegoUzytkownika, int& i
 }
 
 
-void edytujDaneZnajomego(vector<znajomy>& znajomi, int iloscZnajomych) {
+void edytujDaneZnajomego(vector<Znajomy>& znajomi, int iloscZnajomych) {
     int id;
     char wybor;
     string noweImie, noweNazwisko, nowyTelefon, nowyEmail, nowyAdres;
@@ -539,7 +539,7 @@ void edytujDaneZnajomego(vector<znajomy>& znajomi, int iloscZnajomych) {
 }
 
 
-int usunZnajomego(vector<znajomy>& znajomi, int iloscZnajomych) {
+int usunZnajomego(vector<Znajomy>& znajomi, int iloscZnajomych) {
     int id;
     char czyUsunac;
     string noweImie, noweNazwisko, nowyTelefon, nowyEmail, nowyAdres;
@@ -566,12 +566,12 @@ int usunZnajomego(vector<znajomy>& znajomi, int iloscZnajomych) {
 
 int main() {
 
-    vector<uzytkownik> uzytkownicy;
+    vector<Uzytkownik> uzytkownicy;
     int idZalogowanegoUzytkownika = -1;
-    int iloscUzytkownikow = odczytajPlik(uzytkownicy);
+    int iloscUzytkownikow = odczytajPlikUzytkownicy(uzytkownicy);
     bool PokazMenuLogowania = true;
 
-    vector<znajomy> znajomi;
+    vector<Znajomy> znajomi;
     int nowyZnajomy = 0;
     char wybor;
     char wyszukajPoImieniu = '1';
@@ -618,7 +618,7 @@ int main() {
             }
         }
 
-        int iloscZnajomych = OdczytajPlik(znajomi, idZalogowanegoUzytkownika, idOstatniegoZnajomego);
+        int iloscZnajomych = odczytajPlikKontakty(znajomi, idZalogowanegoUzytkownika, idOstatniegoZnajomego);
 
 
         system("cls");
@@ -636,7 +636,7 @@ int main() {
         cout << "9. Wyjscie" << endl;
         cout << "<====================================>" << endl;
 
-       // cout <<"id Ostatniego: " << idOstatniegoZnajomego<<endl;
+        // cout <<"id Ostatniego: " << idOstatniegoZnajomego<<endl;
 
         cin >> wybor;
 
