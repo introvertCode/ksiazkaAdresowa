@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Codeblocks files
+*.cbp
+*.layout
+*.depend
+
+# data saving files
+*.txt

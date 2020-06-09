@@ -1,16 +1,20 @@
 #include <vector>
 #include <iostream>;
 
+using namespace std;
+
 class Uzytkownik{
 public:
-    std::string login;
-    std::string haslo;
+    string login;
+    string haslo;
     int id;
 
 public:
-    Uzytkownik(std::string, std::string, int);
+    Uzytkownik(string, string, int);
     ~Uzytkownik();
-//    void zapisUseraDoPliku(int, std::vector<Uzytkownik>);
-    //bool sprawdzCzyWolnyLogin(std::vector<Uzytkownik>, std::string, int);
+    void nowyUzytownik(vector<Uzytkownik>& uzytkownicy, int& iloscUzytkownikow);
+    bool sprawdzCzyWolnyLogin(vector<Uzytkownik>& uzytkownicy, string login, int iloscUzytkownikow);
+    int logowanie(vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow);
+    void zapisUseraDoPliku(int iloscUzytkownikow, vector<Uzytkownik>& uzytkownicy);
 };
 
