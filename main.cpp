@@ -7,6 +7,7 @@
 #include <vector>
 #include <stdio.h>
 #include <cstdio>
+#include "Users.h"
 
 using namespace std;
 
@@ -16,11 +17,11 @@ struct Znajomy {
     string imie, nazwisko, telefon, email, adres;
 };
 
-struct Uzytkownik {
-    string login;
-    string haslo;
-    int id;
-};
+//struct Uzytkownik {
+//    string login;
+//    string haslo;
+//    int id;
+//};
 
 void zapisUseraDoPliku(int iloscUzytkownikow, vector<Uzytkownik>& uzytkownicy) {
     fstream plik;
@@ -30,6 +31,10 @@ void zapisUseraDoPliku(int iloscUzytkownikow, vector<Uzytkownik>& uzytkownicy) {
         plik << uzytkownicy[i].login <<  "|";
         plik << uzytkownicy[i].haslo <<  "|" << endl;
     }
+
+    cout << "Zapisano pomyslnie!";
+
+    Sleep(1000);
     plik.close();
 }
 
@@ -42,7 +47,7 @@ bool sprawdzCzyWolnyLogin(vector<Uzytkownik>& uzytkownicy, string login, int ilo
     return czyWolnyLogin;
 }
 
-void nowyUzytownik(vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
+void nowyUzytownik(vector<Uzytkownik>& uzytkownicy, int& iloscUzytkownikow) {
     string login, haslo;
     int id = iloscUzytkownikow;
     char decyzja;
@@ -50,15 +55,18 @@ void nowyUzytownik(vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
     while(true) {
         cout << "wpisz nazwe uzytkownika: ";
         cin >> login;
-        if (sprawdzCzyWolnyLogin(uzytkownicy, login, iloscUzytkownikow)==true) {
+        if (sprawdzCzyWolnyLogin(uzytkownicy, login, iloscUzytkownikow) == true) {
             cout << "wpisz haslo: ";
             cin >> haslo;
-            uzytkownicy.push_back(uzytkownik());
-            uzytkownicy[id].login = login;
-            uzytkownicy[id].haslo = haslo;
-            uzytkownicy[id].id = id;
+
+            uzytkownicy.push_back(Uzytkownik (login, haslo, id));
+//            uzytkownicy[id].login = login;
+//            uzytkownicy[id].haslo = haslo;
+//            uzytkownicy[id].id = id;
+            iloscUzytkownikow += 1;
             zapisUseraDoPliku(iloscUzytkownikow, uzytkownicy);
             cout << "utworzono pomyslnie" << endl << endl;
+
             return;
         } else
             cout << "Uzytkownik o takiej nazwie juz istnieje, wrocic do menu? (t/n)" << endl;
@@ -117,7 +125,8 @@ int logowanie(vector<Uzytkownik>& uzytkownicy, int iloscUzytkownikow) {
 
 int odczytajPlikUzytkownicy(vector<Uzytkownik>& uzytkownicy) {
     ifstream plik;
-    string linia;
+    string linia, login, haslo;
+    int id;
     string atrybut;
     int iloscUzytkownikow = 0;
     int pozycja = 0;
@@ -131,21 +140,22 @@ int odczytajPlikUzytkownicy(vector<Uzytkownik>& uzytkownicy) {
             continue;
         stringstream liniaSS (linia);
 
-        uzytkownicy.push_back(uzytkownik());
         while(getline(liniaSS, atrybut, '|' )) {
             switch (pozycja) {
             case 0:
-                uzytkownicy[iloscUzytkownikow].id = stoi(atrybut);
+                id = stoi(atrybut);
                 break;
             case 1:
-                uzytkownicy[iloscUzytkownikow].login = atrybut;
+                login = atrybut;
                 break;
             case 2:
-                uzytkownicy[iloscUzytkownikow].haslo = atrybut;
+                haslo = atrybut;
                 break;
             }
+
             pozycja++;
         }
+        uzytkownicy.push_back(Uzytkownik (login, haslo, id));
         iloscUzytkownikow++;
         pozycja = 0;
     }
@@ -319,7 +329,7 @@ int dodajKontakt (int iloscZnajomych, vector<Znajomy>& znajomi, int idOstatniego
 
 
     if (sprawdzCzyIstniejeZnajomy(imie, nazwisko, iloscZnajomych, znajomi) == false ) {
-        znajomi.push_back(znajomy());
+        znajomi.push_back(Znajomy());
         if (idOstatniegoZnajomego == 0) {
             znajomi[iloscZnajomych].id = 1;
         } else {
@@ -453,7 +463,7 @@ int odczytajPlikKontakty(vector<Znajomy>& znajomi, int idZalogowanegoUzytkownika
             pozycja++;
         }
         if (idUzytkownika == idZalogowanegoUzytkownika ) {
-            znajomi.push_back(znajomy());
+            znajomi.push_back(Znajomy());
             znajomi[iloscZnajomych].id = id;
             znajomi[iloscZnajomych].idUzytkownika = idZalogowanegoUzytkownika;
             znajomi[iloscZnajomych].imie = imie;
@@ -586,6 +596,8 @@ int main() {
             cout << "2. utworz konto" << endl;
             cout << "3. wyjdz" << endl << endl;
 
+            cout << "ilosc uzytkownikow: " << iloscUzytkownikow << endl << endl;
+
             // cout << "ilosc uzytkownikow: " << iloscUzytkownikow <<endl;
             char wybor;
 
@@ -608,7 +620,6 @@ int main() {
                 break;
             case '2':
                 nowyUzytownik(uzytkownicy, iloscUzytkownikow);
-                iloscUzytkownikow += 1;
                 system("pause");
                 continue;
                 break;
